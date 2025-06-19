@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: fraud-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: postgres://user:password@localhost:5432/fraud_detection
+      - key: SECRET_KEY
+        value: your_secret_key_here
+    staticPublishPath: public
+    staticRoutes:
+      - src: /static
+        dest: /static
+      - src: /favicon.ico
+        dest: /favicon.ico
+    healthCheck:
+      path: /health
+      interval: 30s
+      timeout: 10s
+      grace_period: 30s
+      headers:
+        - key: Accept
+          value: application/json
+    autoDeploy: true
+    disk:
+      name: fraud-api-data
+      mountPath: /data
+      sizeGB: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 80
+    domains:
+      - fraud-api.onrender.com
